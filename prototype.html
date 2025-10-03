@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Appointment System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Authentication Styles */
+        .auth-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 450px;
+            margin: 50px auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-header h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .auth-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .link-text {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .link-text a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Main App Styles */
+        .main-app {
+            display: none;
+        }
+
+        .header {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .header h2 {
+            color: #667eea;
+        }
+
+        .logout-btn {
+            background: #ff4757;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Slider Styles */
+        .slider-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            overflow: hidden;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: white;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        .slide h2 {
+            font-size: 32px;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .slide p {
+            font-size: 18px;
+            max-width: 600px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .slide-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .slide-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .slide-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+
+        /* Navigation Menu */
+        .nav-menu {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 15px;
+            background: #f5f5f5;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .content-section h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        /* Voice Recording Button */
+        .voice-btn {
+            background: #ff6b6b;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-weight: 600;
+        }
+
+        .voice-btn.recording {
+            background: #ee5a6f;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Appointment Result */
+        .appointment-result {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #4caf50;
+        }
+
+        .appointment-result h4 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .appointment-result p {
+            color: #1b5e20;
+            margin: 5px 0;
+        }
+
+        .language-selector {
+            margin-bottom: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .otp-timer {
+            color: #666;
+            font-size: 12px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .error-message {
+            color: #ff4757;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .success-message {
+            color: #4caf50;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .voice-status {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Authentication Section -->
+    <div id="authSection">
+        <!-- Login Form -->
+        <div id="loginForm" class="auth-container">
+            <div class="auth-header">
+                <h1>🏥 Hospital Portal</h1>
+                <p>Login to book your appointment</p>
+            </div>
+            
+            <div class="form-group language-selector">
+                <label>Select Language / भाषा चुनें</label>
+                <select id="loginLanguage" onchange="changeLanguage(this.value)">
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी (Hindi)</option>
+                    <option value="bn">বাংলা (Bengali)</option>
+                    <option value="te">తెలుగు (Telugu)</option>
+                    <option value="ta">தமிழ் (Tamil)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label id="loginMobileLabel">Mobile Number / Aadhaar Number</label>
+                <input type="text" id="loginMobile" placeholder="Enter Mobile or Aadhaar" maxlength="12">
+                <span class="error-message" id="loginMobileError"></span>
+            </div>
+
+            <button class="btn" onclick="sendLoginOTP()">Send OTP</button>
+
+            <div class="link-text">
+                <span>New user? </span><a href="#" onclick="showRegister()">Register here</a>
+            </div>
+        </div>
+
+        <!-- OTP Verification -->
+        <div id="otpForm" class="auth-container hidden">
+            <div class="auth-header">
+                <h1>Verify OTP</h1>
+                <p>Enter the OTP sent to your mobile</p>
+            </div>
+
+            <div class="form-group">
+                <label>Enter OTP</label>
+                <input type="text" id="otpInput" placeholder="Enter 6-digit OTP" maxlength="6">
+                <div class="otp-timer" id="otpTimer"></div>
+                <span class="error-message" id="otpError"></span>
+            </div>
+
+            <button class="btn" onclick="verifyOTP()">Verify OTP</button>
+            <button class="btn" style="margin-top: 10px; background: #95a5a6;" onclick="showLogin()">Back</button>
+        </div>
+
+        <!-- Registration Form -->
+        <div id="registerForm" class="auth-container hidden">
+            <div class="auth-header">
+                <h1>Register</h1>
+                <p>Create your account</p>
+            </div>
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="regName" placeholder="Enter your full name">
+            </div>
+
+            <div class="form-group">
+                <label>Mobile Number</label>
+                <input type="text" id="regMobile" placeholder="Enter mobile number" maxlength="10">
+            </div>
+
+            <div class="form-group">
+                <label>Aadhaar Number</label>
+                <input type="text" id="regAadhaar" placeholder="Enter Aadhaar number" maxlength="12">
+            </div>
+
+            <button class="btn" onclick="sendRegisterOTP()">Register & Send OTP</button>
+
+            <div class="link-text">
+                <span>Already registered? </span><a href="#" onclick="showLogin()">Login here</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="main-app">
+        <div class="container">
+            <div class="header">
+                <h2>Welcome, <span id="userName">User</span></h2>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+
+            <!-- Slider -->
+            <div class="slider-container">
+                <div class="slide slide-1 active">
+                    <h2>🏥 Easy Appointment Booking</h2>
+                    <p>Book appointments with specialist doctors in just a few clicks. No more long waiting queues!</p>
+                </div>
+                <div class="slide slide-2">
+                    <h2>⏰ Skip the Wait</h2>
+                    <p>Get your token number instantly and know exactly when to arrive at the hospital</p>
+                </div>
+                <div class="slide slide-3">
+                    <h2>📋 Digital Reports</h2>
+                    <p>Access all your medical reports and test results online anytime, anywhere</p>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <div class="nav-menu">
+                <button class="nav-btn active" onclick="showSection('home')">🏠 Home</button>
+                <button class="nav-btn" onclick="showSection('appointment')">📅 Appointment</button>
+                <button class="nav-btn" onclick="showSection('medicine')">💊 Medicine</button>
+                <button class="nav-btn" onclick="showSection('reports')">📄 Reports</button>
+            </div>
+
+            <!-- Home Section -->
+            <div id="homeSection" class="content-section active">
+                <h3>Welcome to Our Hospital</h3>
+                <p>Our hospital management system helps you:</p>
+                <ul style="margin: 20px 0; line-height: 2;">
+                    <li>✓ Book appointments with specialists</li>
+                    <li>✓ Get instant token numbers</li>
+                    <li>✓ Order medicines online</li>
+                    <li>✓ Access medical reports digitally</li>
+                    <li>✓ Multilingual support for your convenience</li>
+                </ul>
+            </div>
+
+            <!-- Appointment Section -->
+            <div id="appointmentSection" class="content-section">
+                <h3>Book an Appointment</h3>
+                
+                <div class="form-group">
+                    <label>Patient Name</label>
+                    <input type="text" id="patientName" placeholder="Enter patient name">
+                </div>
+
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="number" id="patientAge" placeholder="Enter age">
+                </div>
+
+                <div class="form-group">
+                    <label>Gender</label>
+                    <select id="patientGender">
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="text" id="patientMobile" placeholder="Enter mobile number" maxlength="10">
+                </div>
+
+                <div class="form-group">
+                    <label>Describe Your Problem</label>
+                    <textarea id="patientProblem" rows="4" placeholder="Describe your health problem..."></textarea>
+                    <button class="voice-btn" id="voiceBtn" onclick="startVoiceRecording()">🎤 Voice Input</button>
+                    <div class="voice-status" id="voiceStatus"></div>
+                </div>
+
+                <button class="btn" onclick="bookAppointment()">Book Appointment</button>
+
+                <div id="appointmentResult" class="hidden"></div>
+            </div>
+
+            <!-- Medicine Section -->
+            <div id="medicineSection" class="content-section">
+                <h3>Order Medicine</h3>
+                <p>Medicine ordering feature coming soon...</p>
+            </div>
+
+            <!-- Reports Section -->
+            <div id="reportsSection" class="content-section">
+                <h3>Medical Reports</h3>
+                <p>Your medical reports and test results will appear here...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Storage (In-memory)
+        let users = [];
+        let currentUser = null;
+        let otpData = null;
+        let currentLanguage = 'en';
+        let slideIndex = 0;
+        let recognition = null;
+
+        // Translations
+        const translations = {
+            en: {
+                welcome: 'Welcome',
+                bookAppointment: 'Book Appointment'
+            },
+            hi: {
+                welcome: 'स्वागत है',
+                bookAppointment: 'अपॉइंटमेंट बुक करें'
+            }
+        };
+
+        // Department detection based on symptoms
+        const departmentKeywords = {
+            'Cardiology': ['heart', 'chest pain', 'cardiac', 'blood pressure', 'hypertension', 'दिल', 'छाती दर्द'],
+            'Orthopedics': ['bone', 'fracture', 'joint pain', 'back pain', 'arthritis', 'हड्डी', 'जोड़ों का दर्द'],
+            'Dermatology': ['skin', 'rash', 'acne', 'allergy', 'itching', 'त्वचा', 'खुजली'],
+            'ENT': ['ear', 'nose', 'throat', 'hearing', 'sinus', 'कान', 'नाक', 'गला'],
+            'Pediatrics': ['child', 'baby', 'infant', 'kid', 'vaccination', 'बच्चा'],
+            'Neurology': ['headache', 'migraine', 'seizure', 'paralysis', 'nerve', 'सिरदर्द'],
+            'Gynecology': ['pregnancy', 'menstrual', 'women health', 'गर्भावस्था'],
+            'General Medicine': ['fever', 'cold', 'cough', 'flu', 'weakness', 'बुखार', 'खांसी']
+        };
+
+        // Initialize slider
+        function initSlider() {
+            setInterval(() => {
+                const slides = document.querySelectorAll('.slide');
+                slides[slideIndex].classList.remove('active');
+                slideIndex = (slideIndex + 1) % slides.length;
+                slides[slideIndex].classList.add('active');
+            }, 4000);
+        }
+
+        // Language change
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+        }
+
+        // Show/Hide sections
+        function showLogin() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('otpForm').classList.add('hidden');
+        }
+
+        function showRegister() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+            document.getElementById('otpForm').classList.add('hidden');
+        }
+
+        function showOTP() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('otpForm').classList.remove('hidden');
+            startOTPTimer();
+        }
+
+        // Send OTP for login
+        function sendLoginOTP() {
+            const mobile = document.getElementById('loginMobile').value;
+            const errorEl = document.getElementById('loginMobileError');
+            
+            if (!mobile || (mobile.length !== 10 && mobile.length !== 12)) {
+                errorEl.textContent = 'Please enter valid 10-digit mobile or 12-digit Aadhaar';
+                return;
+            }
+
+            const user = users.find(u => u.mobile === mobile || u.aadhaar === mobile);
+            if (!user) {
+                errorEl.textContent = 'User not found. Please register first.';
+                return;
+            }
+
+            // Simulate OTP generation
+            const otp = Math.floor(100000 + Math.random() * 900000);
+            otpData = { mobile, otp, user, timestamp: Date.now() };
+            
+            alert(`OTP sent: ${otp} (Demo: In production, this will be sent via SMS)`);
+            showOTP();
+        }
+
+        // Send OTP for registration
+        function sendRegisterOTP() {
+            const name = document.getElementById('regName').value;
+            const mobile = document.getElementById('regMobile').value;
+            const aadhaar = document.getElementById('regAadhaar').value;
+
+            if (!name || !mobile || !aadhaar) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            if (mobile.length !== 10) {
+                alert('Please enter valid 10-digit mobile number');
+                return;
+            }
+
+            if (aadhaar.length !== 12) {
+                alert('Please enter valid 12-digit Aadhaar number');
+                return;
+            }
+
+            // Check if user already exists
+            if (users.find(u => u.mobile === mobile || u.aadhaar === aadhaar)) {
+                alert('User already registered. Please login.');
+                return;
+            }
+
+            // Simulate OTP generation
+            const otp = Math.floor(100000 + Math.random() * 900000);
+            const newUser = { name, mobile, aadhaar };
+            otpData = { mobile, otp, user: newUser, timestamp: Date.now(), isNewUser: true };
+            
+            alert(`OTP sent: ${otp} (Demo: In production, this will be sent via SMS)`);
+            showOTP();
+        }
+
+        // Start OTP timer
+        function startOTPTimer() {
+            let seconds = 60;
+            const timerEl = document.getElementById('otpTimer');
+            
+            const interval = setInterval(() => {
+                seconds--;
+                timerEl.textContent = `OTP expires in ${seconds}s`;
+                
+                if (seconds <= 0) {
+                    clearInterval(interval);
+                    timerEl.textContent = 'OTP expired. Please request new OTP.';
+                }
+            }, 1000);
+        }
+
+        // Verify OTP
+        function verifyOTP() {
+            const otp = document.getElementById('otpInput').value;
+            const errorEl = document.getElementById('otpError');
+
+            if (!otp || otp.length !== 6) {
+                errorEl.textContent = 'Please enter 6-digit OTP';
+                return;
+            }
+
+            if (!otpData) {
+                errorEl.textContent = 'Please request OTP first';
+                return;
+            }
+
+            if (otp != otpData.otp) {
+                errorEl.textContent = 'Invalid OTP';
+                return;
+            }
+
+            // Check OTP expiry (60 seconds)
+            if (Date.now() - otpData.timestamp > 60000) {
+                errorEl.textContent = 'OTP expired. Please request new OTP';
+                return;
+            }
+
+            // Register new user if needed
+            if (otpData.isNewUser) {
+                users.push(otpData.user);
+            }
+
+            currentUser = otpData.user;
+            document.getElementById('userName').textContent = currentUser.name;
+            
+            // Show main app
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            
+            initSlider();
+            document.getElementById('otpInput').value = '';
+        }
+
+        // Logout
+        function logout() {
+            currentUser = null;
+            document.getElementById('authSection').style.display = 'block';
+            document.getElementById('mainApp').style.display = 'none';
+            showLogin();
+        }
+
+        // Show navigation sections
+        function showSection(section) {
+            const sections = ['home', 'appointment', 'medicine', 'reports'];
+            const buttons = document.querySelectorAll('.nav-btn');
+            
+            sections.forEach(s => {
+                document.getElementById(s + 'Section').classList.remove('active');
+            });
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(section + 'Section').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Detect department from problem
+        function detectDepartment(problem) {
+            problem = problem.toLowerCase();
+            
+            for (const [dept, keywords] of Object.entries(departmentKeywords)) {
+                for (const keyword of keywords) {
+                    if (problem.includes(keyword.toLowerCase())) {
+                        return dept;
+                    }
+                }
+            }
+            
+            return 'General Medicine';
+        }
+
+        // Book appointment
+        function bookAppointment() {
+            const name = document.getElementById('patientName').value;
+            const age = document.getElementById('patientAge').value;
+            const gender = document.getElementById('patientGender').value;
+            const mobile = document.getElementById('patientMobile').value;
+            const problem = document.getElementById('patientProblem').value;
+
+            if (!name || !age || !gender || !mobile || !problem) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            // Detect department
+            const department = detectDepartment(problem);
+            const tokenNumber = Math.floor(1000 + Math.random() * 9000);
+            const roomNumber = Math.floor(100 + Math.random() * 400);
+
+            // Display result
+            const resultHTML = `
+                <div class="appointment-result">
+                    <h4>✅ Appointment Booked Successfully!</h4>
+                    <p><strong>Patient:</strong> ${name}</p>
+                    <p><strong>Department:</strong> ${department}</p>
+                    <p><strong>Token Number:</strong> ${tokenNumber}</p>
+                    <p><strong>Room Number:</strong> ${roomNumber}</p>
+                    <p><strong>Estimated Wait Time:</strong> 15-20 minutes</p>
+                    <p style="margin-top: 10px; font-style: italic;">Please arrive 10 minutes before your turn.</p>
+                </div>
+            `;
+
+            document.getElementById('appointmentResult').innerHTML = resultHTML;
+            document.getElementById('appointmentResult').classList.remove('hidden');
+        }
+
+        // Voice recording
+        function startVoiceRecording() {
+            const voiceBtn = document.getElementById('voiceBtn');
+            const statusEl = document.getElementById('voiceStatus');
+
+            if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+                alert('Voice recognition is not supported in your browser. Please use Chrome.');
+                return;
+            }
+
+            if (!recognition) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = currentLanguage === 'hi' ? 'hi-IN' : 
+                                  currentLanguage === 'bn' ? 'bn-IN' :
+                                  currentLanguage === 'te' ? 'te-IN' :
+                                  currentLanguage === 'ta' ? 'ta-IN' : 'en-US';
+
+                recognition.onstart = function() {
+                    voiceBtn.classList.add('recording');
+                    voiceBtn.textContent = '🎤 Listening...';
+                    statusEl.textContent = 'Speak now...';
+                };
+
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('patientProblem').value = transcript;
+                    statusEl.textContent = 'Recorded successfully!';
+                };
+
+                recognition.onerror = function(event) {
+                    statusEl.textContent = 'Error: ' + event.error;
+                    voiceBtn.classList.remove('recording');
+                    voiceBtn.textContent = '🎤 Voice Input';
+                };
+
+                recognition.onend = function() {
+                    voiceBtn.classList.remove('recording');
+                    voiceBtn.textContent = '🎤 Voice Input';
+                };
+            }
+
+            recognition.start();
+        }
+
+        // Initialize app
+        window.onload = function() {
+            // Add some demo users
+            users.push({
+                name: 'Demo User',
+                mobile: '9876543210',
+                aadhaar: '123456789012'
+            });
+        };
+    </script>
+</body>
+</html>
